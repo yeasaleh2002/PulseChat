@@ -66,9 +66,11 @@ This document provides complete, formalized documentation for all 13 RESTful HTT
 ```
 
 #### Response (200 OK)
+> **Security Note**: The JWT token payload signature is sanitized in this documentation to comply with GitGuardian secret scanning policies.
+
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTg4MjQ2OGU1ZDZhYWM5NzUyMWUyNWUiLCJpYXQiOjE3ODczMTQwNTUsImV4cCI6MTc4NzkxODg1NX0.Vc8G7gMldXytm8h09FQuMWbQnrMhlsqs267g5GWnhz8",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.<JWT_TOKEN_MASKED_FOR_GITGUARDIAN_SECURITY>",
   "user": {
     "_id": "6a882468e5d6aac97521e25e",
     "name": "Ada Lovelace",
