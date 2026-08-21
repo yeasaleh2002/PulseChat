@@ -583,16 +583,18 @@ This document provides complete, formalized documentation for all 13 RESTful HTT
 
 - **Endpoint**: `GET /health`
 - **Access**: Public
-- **Description**: Verifies backend server health status and runtime operational readiness.
+- **Description**: Listed in Swagger UI for system health verification. Note that on live backend server deployment, calling `GET /health` returns 404 Route Not Found.
 
 #### Request Body
 *None*
 
-#### Response (200 OK)
+#### Response (404 Not Found)
 ```json
 {
-  "status": "ok",
-  "timestamp": "2026-08-21T12:25:00.000Z"
+  "error": {
+    "message": "Route not found",
+    "code": "NOT_FOUND"
+  }
 }
 ```
 
