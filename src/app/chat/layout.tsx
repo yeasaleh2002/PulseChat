@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sidebar } from "@/components/chat/sidebar";
 import { useChatStore } from "@/store/useChatStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Menu, MessageSquare, Home } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -12,6 +15,14 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   const { toggleMobileSidebar } = useChatStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
