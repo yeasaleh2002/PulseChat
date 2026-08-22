@@ -6,6 +6,8 @@
 
 [build.environment]
   NETLIFY_SKIP_COLLABORATIVE_PREVIEWS = "true"
+  NETLIFY_SKIP_DRAWER = "true"
+  DISABLE_NETLIFY_DRAWER = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

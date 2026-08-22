@@ -66,10 +66,26 @@
 
 #netlify-modal-provider,
 [data-netlify-deploy-preview],
+[id*="netlify"],
+[class*="netlify"],
 iframe[src*="netlify"],
+netlify-drawer,
 .netlify-feedback-drawer,
-netlify-drawer {
+.netlify-badge,
+#netlify-badge,
+.powered-by-netlify,
+a[href*="netlify.com"][target="_blank"],
+div[style*="z-index"][style*="bottom: 0"],
+div[style*="z-index"][style*="bottom: 12px"],
+div[style*="z-index"][style*="bottom: 16px"] {
   display: none !important;
   visibility: hidden !important;
+  opacity: 0 !important;
   pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  clip: rect(0, 0, 0, 0) !important;
 }

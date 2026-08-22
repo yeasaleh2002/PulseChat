@@ -108,6 +108,30 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function purgeNetlifyDrawer() {
+                  var sel = ['netlify-drawer', '#netlify-modal-provider', '[data-netlify-deploy-preview]', 'iframe[src*="netlify"]', '.netlify-feedback-drawer', '#netlify-badge', '.netlify-badge', '.powered-by-netlify'];
+                  sel.forEach(function(s) {
+                    document.querySelectorAll(s).forEach(function(el) {
+                      try { el.remove(); } catch(e) {}
+                    });
+                  });
+                }
+                if (typeof window !== 'undefined') {
+                  window.addEventListener('DOMContentLoaded', purgeNetlifyDrawer);
+                  window.addEventListener('load', purgeNetlifyDrawer);
+                  try {
+                    var obs = new MutationObserver(purgeNetlifyDrawer);
+                    obs.observe(document.documentElement, { childList: true, subtree: true });
+                  } catch(e) {}
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning className="min-h-screen font-sans antialiased flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
         <Providers>
