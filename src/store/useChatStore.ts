@@ -54,6 +54,7 @@ interface ChatState {
 
   handleNewMessageRealtime: (newMessage: Message) => void;
   handleConversationUpdatedRealtime: (updatedConversation: Conversation) => void;
+  resetChatState: () => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -75,6 +76,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setSocketConnected: (connected) => set({ isSocketConnected: connected }),
 
+  resetChatState: () => set({
+    conversations: [],
+    activeConversationId: null,
+    isLoadingConversations: false,
+    isSearching: false,
+    searchResults: [],
+    searchQuery: "",
+    isMobileSidebarOpen: false,
+    error: null,
+    unreadCounts: {},
+    messagesByConversation: {},
+    isLoadingMessages: false,
+    isLoadingOlderMessages: false,
+    hasMoreMessages: {},
+  }),
+
   fetchConversations: async () => {
     set({ isLoadingConversations: true, error: null });
     try {
@@ -84,14 +101,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const storedActiveId =
         typeof window !== "undefined" ? localStorage.getItem("activeConversationId") : null;
       const currentActiveId = get().activeConversationId;
-
       let targetId: string | null = null;
       if (currentActiveId && data.some((c) => c._id === currentActiveId)) {
         targetId = currentActiveId;
       } else if (storedActiveId && data.some((c) => c._id === storedActiveId)) {
         targetId = storedActiveId;
-      } else if (data.length > 0) {
-        targetId = data[0]._id;
       }
 
       if (targetId) {
@@ -251,15 +265,21 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (!text.trim()) return null;
 
     try {
-      if (socket && socket.connected) {
-        socket.emit("message:send", { conversationId, text: text.trim() });
-      }
-
       const newMessage = await sendMessageApi(conversationId, text.trim());
 
       set((state) => {
         const existing = state.messagesByConversation[conversationId] || [];
-        const updatedMsgs = [...existing, newMessage];
+        const isDuplicate = existing.some((m) => {
+          if (m._id && newMessage._id && m._id === newMessage._id) return true;
+          if (m.text && newMessage.text && m.text.trim() === newMessage.text.trim()) {
+            const t1 = new Date(m.createdAt).getTime();
+            const t2 = new Date(newMessage.createdAt).getTime();
+            if (!isNaN(t1) && !isNaN(t2) && Math.abs(t1 - t2) < 5000) return true;
+          }
+          return false;
+        });
+
+        const updatedMsgs = isDuplicate ? existing : [...existing, newMessage];
 
         const updatedConversations = state.conversations.map((c) => {
           if (c._id === conversationId) {
@@ -438,7 +458,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     set((state) => {
       const existing = state.messagesByConversation[targetConvId] || [];
-      const exists = existing.some((m) => m._id === newMessage._id);
+      const exists = existing.some((m) => {
+        if (m._id && newMessage._id && m._id === newMessage._id) return true;
+        if (m.text && newMessage.text && m.text.trim() === newMessage.text.trim()) {
+          const t1 = new Date(m.createdAt).getTime();
+          const t2 = new Date(newMessage.createdAt).getTime();
+          if (!isNaN(t1) && !isNaN(t2) && Math.abs(t1 - t2) < 5000) return true;
+        }
+        return false;
+      });
 
       const updatedMsgs = exists
         ? existing

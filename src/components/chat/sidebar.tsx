@@ -50,17 +50,20 @@ export function Sidebar() {
   });
 
   const getConversationTitle = (c: Conversation): string => {
-    if (c.name) return c.name;
+    if (c.type === "group") {
+      return c.name || "Group Chat";
+    }
     if (c.participant && typeof c.participant === "object" && (c.participant as User).name) {
       return (c.participant as User).name;
     }
     if (Array.isArray(c.participants)) {
       const otherUser = c.participants.find(
-        (p) => typeof p !== "string" && p._id !== user?._id
+        (p) => typeof p !== "string" && (p as User)._id !== user?._id
       ) as User | undefined;
       if (otherUser?.name) return otherUser.name;
     }
-    return c.type === "group" ? "Group Chat" : "Direct Chat";
+    if (c.name && c.name !== "Direct Chat") return c.name;
+    return "Direct Chat";
   };
 
   const getConversationAvatarText = (c: Conversation): string => {

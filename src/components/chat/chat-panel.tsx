@@ -96,7 +96,9 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
   };
 
   const getConversationDisplayTitle = (): string => {
-    if (conversation.name) return conversation.name;
+    if (conversation.type === "group") {
+      return conversation.name || "Group Chat";
+    }
     if (
       conversation.participant &&
       typeof conversation.participant === "object" &&
@@ -106,11 +108,12 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
     }
     if (Array.isArray(conversation.participants)) {
       const otherUser = conversation.participants.find(
-        (p) => typeof p !== "string" && p._id !== user?._id,
+        (p) => typeof p !== "string" && (p as User)._id !== user?._id,
       ) as User | undefined;
       if (otherUser?.name) return otherUser.name;
     }
-    return conversation.type === "group" ? "Group Chat" : "Direct Chat";
+    if (conversation.name && conversation.name !== "Direct Chat") return conversation.name;
+    return "Direct Chat";
   };
 
   return (

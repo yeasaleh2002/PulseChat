@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { User } from "@/types";
 import { login as loginApi, getCurrentUser as getCurrentUserApi } from "@/services/chatService";
+import { useChatStore } from "./useChatStore";
 
 interface AuthState {
   user: User | null;
@@ -90,6 +91,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem("user");
       localStorage.removeItem("activeConversationId");
     }
+    
+    // Clear chat store state on logout
+    useChatStore.getState().resetChatState();
+
     set({
       user: null,
       token: null,
