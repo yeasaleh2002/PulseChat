@@ -32,51 +32,57 @@
 
 ## 🛠 Tech Stack
 
-| Domain | Technology |
-|---|---|
-| **Framework** | Next.js 15.1 (App Router) |
-| **Language** | TypeScript (Strict mode) |
-| **Styling** | Tailwind CSS & Glassmorphism |
-| **State Management** | Zustand |
-| **Virtualization** | React Virtuoso |
-| **Real-time Engine** | Socket.io Client |
-| **HTTP Client** | Axios (with Request/Response Interceptors) |
+| Domain                 | Technology                                      |
+| ---------------------- | ----------------------------------------------- |
+| **Framework**          | Next.js 15.1 (App Router)                       |
+| **Language**           | TypeScript (Strict mode)                        |
+| **Styling**            | Tailwind CSS & Glassmorphism                    |
+| **State Management**   | Zustand                                         |
+| **Virtualization**     | React Virtuoso                                  |
+| **Real-time Engine**   | Socket.io Client                                |
+| **HTTP Client**        | Axios (with Request/Response Interceptors)      |
 | **ISR & Revalidation** | Next.js `revalidateTag` & Server Route Handlers |
-| **Animations** | Framer Motion |
-| **Icons** | Lucide React |
+| **Animations**         | Framer Motion                                   |
+| **Icons**              | Lucide React                                    |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js `v18.0.0` or later
 - npm `v9.0.0` or later
 
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/your-org/pulse-chat.git
    cd pulse-chat
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Set Environment Variables (Optional):**
    Create a `.env.local` file in the root directory:
+
    ```env
    NEXT_PUBLIC_API_BASE_URL=https://frontend-task-chatapp.onrender.com/api
    NEXT_PUBLIC_SOCKET_URL=https://frontend-task-chatapp.onrender.com
    ```
 
 4. **Run the Development Server:**
+
    ```bash
    npm run dev
    ```
+
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 5. **Build for Production:**
@@ -90,11 +96,13 @@
 ## 📝 Part 3 — Thought Process Write-up
 
 ### Summary Overview
+
 The development of **PulseChat** followed a disciplined, production-grade approach across all three assignment parts. From crafting formalized API documentation (`API_DOCUMENTATION.md`) before writing code, to engineering a scalable DOM-virtualized messaging client and a responsive landing page, every decision prioritized user experience, real-time performance, and robust error resilience.
 
 ---
 
 ### 1. Architecture, Libraries & Approach (Part 1)
+
 - **DOM Virtualization with React Virtuoso**: Standard list rendering collapses when scrolling through thousands of chat messages due to DOM node overflow. By selecting `react-virtuoso`, we render only visible nodes in the viewport with smooth 60fps scrolling and zero memory leaks.
 - **Auto-Scroll Behavior (`followOutput`)**: Configured `react-virtuoso`'s `followOutput` property to automatically stick to the bottom on new incoming messages while respecting user intent when scrolled up to read history.
 - **Zustand for Global State**: Redux adds unnecessary boilerplate, whereas React Context suffers from re-render cascades. Zustand provides atomic selectors and lightweight state management for active conversations, user sessions, and socket connectivity.
@@ -104,6 +112,7 @@ The development of **PulseChat** followed a disciplined, production-grade approa
 ---
 
 ### 2. Creative Design Choices (Part 2)
+
 - **Visual Aesthetic**: Crafted a glassmorphism theme using high-contrast slate color palettes, subtle ambient backlights, and smooth Framer Motion entrance animations.
 - **Responsive Navigation Fix (Desktop & Mobile)**: Fixed an issue where clicking header links (`Features`, `Security`, `Architecture`, `Docs`) from the `/chat` or `/login` page failed to navigate to the landing page. Configured absolute anchor paths (`/#features`, `/#security`, `/#architecture`, `/#docs`) so navigation works seamlessly across desktop and mobile drawer menus.
 
@@ -137,7 +146,8 @@ If given additional time to extend this project beyond the assignment scope, I w
 ### 5. Problems Faced & Manual Resolutions
 
 #### A. User Search Issue (Name vs. Phone Number & `+` Sign Backend 500 Crash)
-* **Problem**: Initially, user search only worked for display names. Searching by phone numbers (e.g. `+15551234100` or `01733586288`) either returned empty results or crashed the backend server with an HTTP 500 Error:
+
+- **Problem**: Initially, user search only worked for display names. Searching by phone numbers (e.g. `+15551234100` or `01733586288`) either returned empty results or crashed the backend server with an HTTP 500 Error:
   ```json
   {
     "error": {
@@ -146,24 +156,27 @@ If given additional time to extend this project beyond the assignment scope, I w
     }
   }
   ```
-* **Root Cause**: The backend API passes query parameters directly into a MongoDB regular expression (`new RegExp(q, "i")`). In regex, `+` is an unescaped quantifier. Sending `+` at the start of a query string triggered a syntax error in MongoDB. Furthermore, the backend regex query only matched display names or exact strings.
-* **Manual Resolution**:
+- **Root Cause**: The backend API passes query parameters directly into a MongoDB regular expression (`new RegExp(q, "i")`). In regex, `+` is an unescaped quantifier. Sending `+` at the start of a query string triggered a syntax error in MongoDB. Furthermore, the backend regex query only matched display names or exact strings.
+- **Manual Resolution**:
   1. **Query Regex Sanitization**: Before calling `/users/search?q=...`, raw unescaped regex quantifiers (`+`, `*`, `?`, `^`, `$`) are stripped from the HTTP GET parameter string.
   2. **Dual-Fetch Fallback Roster**: `searchUsers()` queries both `/users/search?q={cleanQuery}` and `/users/search` (full directory list) in parallel, merging and deduplicating user records by `_id`.
   3. **Digit Normalization Engine**: We implemented client-side phone number normalization (`u.phone.replace(/\D/g, '').includes(cleanDigits)`). This compares pure digits, enabling instant, accurate search results for any phone number format (e.g. `017`, `1555`, `555`, `01700000001`, `+8801700000001`, or `+15551234567`).
 
 #### B. Landing Page Image & Animation Runtime Error
-* **Problem**: Using external static images and heavy unoptimized layout animation styles caused hydration mismatches, long rendering delay errors, and browser layout shifts.
-* **Solution**: Replaced heavy static images with pure CSS glassmorphism styling, hardware-accelerated Framer Motion staggered micro-animations (`initial={{ opacity: 0, y: 18 }}`), and added `suppressHydrationWarning` to the root HTML body tag.
+
+- **Problem**: Using external static images and heavy unoptimized layout animation styles caused hydration mismatches, long rendering delay errors, and browser layout shifts.
+- **Solution**: Replaced heavy static images with pure CSS glassmorphism styling, hardware-accelerated Framer Motion staggered micro-animations (`initial={{ opacity: 0, y: 18 }}`), and added `suppressHydrationWarning` to the root HTML body tag.
 
 ---
 
 ### 6. SEO Optimization & Incremental Static Regeneration (ISR) Architecture
 
 #### A. Next.js 15 App Router SEO Architecture
+
 - **Dynamic SEO Engine & 500+ Keyword Dictionary** (`src/lib/seo-keywords.ts`): Configured dynamic metadata generators for OpenGraph, Twitter Cards, canonical tags, and structured JSON-LD `SoftwareApplication` microdata for maximum search engine indexing.
 
 #### B. How Incremental Static Regeneration (ISR) is Used
+
 In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **On-Demand Tag-Based Revalidation (`revalidateTag`)**.
 
 1. **Build-Time Static Pre-Rendering**:
@@ -171,6 +184,7 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
 
 2. **On-Demand Tag Revalidation Handler (`src/app/api/revalidate/route.ts`)**:
    Instead of wasteful time-based polling (e.g., `revalidate = 60`), we built an event-driven route handler that invalidates Next.js cache tags on demand:
+
    ```typescript
    import { revalidateTag } from "next/cache";
    import { NextRequest, NextResponse } from "next/server";
@@ -179,29 +193,47 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
      const body = await request.json().catch(() => ({}));
      const tag = body.tag || "conversations";
      revalidateTag(tag);
-     return NextResponse.json({ revalidated: true, tag, timestamp: Date.now() });
+     return NextResponse.json({
+       revalidated: true,
+       tag,
+       timestamp: Date.now(),
+     });
    }
    ```
 
 3. **Event-Driven Triggers (`src/services/chatService.ts`)**:
    When users take actions (sending a message or creating a group), the client triggers tag revalidation:
+
    ```typescript
    // Message Sent -> Invalidates "messages" tag
-   export async function sendMessage(conversationId: string, text: string): Promise<Message> {
-     const response = await api.post<Message>("/messages", { conversationId, text });
+   export async function sendMessage(
+     conversationId: string,
+     text: string,
+   ): Promise<Message> {
+     const response = await api.post<Message>("/messages", {
+       conversationId,
+       text,
+     });
      triggerRevalidateTag("messages");
      return response.data;
    }
 
    // Group Created -> Invalidates "conversations" tag
-   export async function createGroup(name: string, participantIds: string[]): Promise<Conversation> {
-     const response = await api.post<Conversation>("/conversations/group", { name, participantIds });
+   export async function createGroup(
+     name: string,
+     participantIds: string[],
+   ): Promise<Conversation> {
+     const response = await api.post<Conversation>("/conversations/group", {
+       name,
+       participantIds,
+     });
      triggerRevalidateTag("conversations");
      return response.data;
    }
    ```
 
 4. **ISR Lifecycle Sequence**:
+
    ```mermaid
    sequenceDiagram
        autonumber
@@ -214,11 +246,11 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
        User->>Browser: Opens Landing Page / Chat App
        Browser->>NextJS: GET / (Instant Static HTML)
        NextJS-->>Browser: 200 OK (Sub-50ms SSG Cache)
-       
+
        User->>Browser: Sends Message / Creates Group
        Browser->>Backend: POST /messages OR POST /conversations/group
        Backend-->>Browser: 200 OK (Created Data)
-       
+
        Browser->>API: POST /api/revalidate { tag: "messages" }
        API->>NextJS: revalidateTag("messages")
        Note over NextJS: Next.js purges stale static cache entries & regenerates background static cache
@@ -229,6 +261,7 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
 ### 7. Bot Request Handling & Search Engine Crawler Strategy
 
 #### A. Search Engine Crawlers & Social Link Bots (Googlebot, Bingbot, Twitterbot, Slackbot)
+
 1. **Pre-rendered HTML Delivery**: Search crawlers (e.g. `User-Agent: Googlebot`) requesting `/`, `/login`, or `/chat` immediately receive static, pre-rendered HTML without waiting for client-side JavaScript execution or API hydration.
 2. **Explicit Robot Directives**: `src/app/layout.tsx` metadata exports specific indexing rules:
    ```typescript
@@ -248,6 +281,7 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
 4. **Rich Social Link Previews**: OpenGraph and Twitter Card metadata tags format instant, rich unfurls when links are shared on Slack, Discord, Twitter, or iMessage.
 
 #### B. Malicious Bot Protection & Rate Limiting
+
 1. **Security Headers**: `next.config.ts` enforces `Content-Security-Policy`, `X-Frame-Options: DENY` (stopping clickjacking bots), and `X-Content-Type-Options: nosniff` (stopping MIME-sniffing bots).
 2. **Axios Interceptor Token Invalidation**: Automated bot requests attempting unauthorized calls trigger automatic `401 Unauthorized` clearing and session termination.
 3. **UI Debouncing & Lockout Timers**: Form submissions (login, message dispatching) feature 300ms debouncing and rolling lockout timers to prevent automated script spam.
