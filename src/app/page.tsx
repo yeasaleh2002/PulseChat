@@ -23,6 +23,11 @@ import {
   Activity,
   Gauge,
   Check,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  Server,
+  FileCode2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -73,6 +78,12 @@ export default function LandingPage() {
     "security",
   );
 
+  const [selectedApiCategory, setSelectedApiCategory] = useState<
+    "all" | "auth" | "users" | "messages" | "group"
+  >("all");
+  const [expandedEndpoint, setExpandedEndpoint] = useState<string | null>("ep-1");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const handleSendSandboxMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sandboxInput.trim()) return;
@@ -99,23 +110,153 @@ export default function LandingPage() {
     ]);
   };
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-      },
-    },
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 18 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, ease: "easeOut" },
+  const endpointsList = [
+    {
+      id: "ep-1",
+      number: "01",
+      category: "auth",
+      method: "POST",
+      path: "/auth/login",
+      title: "User Authentication & Session Generation",
+      description: "Authenticates or registers a user via phone number and display name, returning a JWT token.",
+      requestBody: `{\n  "phone": "+15550199",\n  "name": "Alex Morgan"\n}`,
+      responseBody: `{\n  "token": "eyJhbGciOiJIUzI1Ni...",\n  "user": {\n    "_id": "usr_99812",\n    "phone": "+15550199",\n    "name": "Alex Morgan"\n  }\n}`,
     },
+    {
+      id: "ep-2",
+      number: "02",
+      category: "auth",
+      method: "GET",
+      path: "/auth/me",
+      title: "Current Authenticated Session Details",
+      description: "Retrieves the current user's profile and active session state using Bearer authorization.",
+      requestBody: `// Headers:\nAuthorization: Bearer <jwt_token>`,
+      responseBody: `{\n  "_id": "usr_99812",\n  "phone": "+15550199",\n  "name": "Alex Morgan",\n  "createdAt": "2026-08-22T08:00:00.000Z"\n}`,
+    },
+    {
+      id: "ep-3",
+      number: "03",
+      category: "users",
+      method: "GET",
+      path: "/users/search",
+      title: "User Search by Phone or Name",
+      description: "Performs server-side debounced search for users matching a phone number or display name query.",
+      requestBody: `// Query Parameter:\nGET /api/users/search?query=alex`,
+      responseBody: `[\n  {\n    "_id": "usr_99812",\n    "phone": "+15550199",\n    "name": "Alex Morgan"\n  }\n]`,
+    },
+    {
+      id: "ep-4",
+      number: "04",
+      category: "messages",
+      method: "GET",
+      path: "/conversations",
+      title: "User Conversation Roster Retrieval",
+      description: "Fetches all active 1-on-1 direct messages and group conversations for the authenticated user.",
+      requestBody: `// Headers:\nAuthorization: Bearer <jwt_token>`,
+      responseBody: `[\n  {\n    "_id": "conv_7701",\n    "type": "group",\n    "name": "Dev Team Lead",\n    "unreadCount": 0,\n    "lastMessage": {\n      "text": "Virtualization is working!",\n      "createdAt": "2026-08-22T08:30:00Z"\n    }\n  }\n]`,
+    },
+    {
+      id: "ep-5",
+      number: "05",
+      category: "messages",
+      method: "GET",
+      path: "/conversations/:id/messages",
+      title: "Paginated Message History Retrieval",
+      description: "Retrieves paginated historical messages for infinite scroll virtualization.",
+      requestBody: `// Query Parameters:\nGET /api/conversations/conv_7701/messages?limit=20&before=2026-08-22T08:00:00Z`,
+      responseBody: `[\n  {\n    "_id": "msg_101",\n    "conversation": "conv_7701",\n    "sender": { "_id": "usr_99812", "name": "Alex Morgan" },\n    "text": "Socket.io transport online",\n    "createdAt": "2026-08-22T08:15:00.000Z"\n  }\n]`,
+    },
+    {
+      id: "ep-6",
+      number: "06",
+      category: "messages",
+      method: "POST",
+      path: "/conversations/direct",
+      title: "Initiate Direct 1-on-1 Conversation",
+      description: "Creates or fetches an existing 1-on-1 private direct messaging channel between two users.",
+      requestBody: `{\n  "recipientId": "usr_44102"\n}`,
+      responseBody: `{\n  "_id": "conv_8812",\n  "type": "direct",\n  "participant": {\n    "_id": "usr_44102",\n    "name": "Sarah Connor"\n  }\n}`,
+    },
+    {
+      id: "ep-7",
+      number: "07",
+      category: "group",
+      method: "POST",
+      path: "/conversations/group",
+      title: "Create Multi-Participant Group Conversation",
+      description: "Creates a new group conversation with a specified title and initial member roster.",
+      requestBody: `{\n  "name": "Frontend Core Team",\n  "participantIds": ["usr_44102", "usr_99812"]\n}`,
+      responseBody: `{\n  "_id": "conv_9900",\n  "type": "group",\n  "name": "Frontend Core Team",\n  "adminIds": ["usr_99812"],\n  "participants": ["usr_44102", "usr_99812"]\n}`,
+    },
+    {
+      id: "ep-8",
+      number: "08",
+      category: "group",
+      method: "POST",
+      path: "/conversations/:id/participants",
+      title: "Add Members to Group Chat",
+      description: "Allows group administrators to invite new members to an existing group conversation.",
+      requestBody: `{\n  "userIds": ["usr_55109"]\n}`,
+      responseBody: `{\n  "_id": "conv_9900",\n  "name": "Frontend Core Team",\n  "participants": ["usr_44102", "usr_99812", "usr_55109"]\n}`,
+    },
+    {
+      id: "ep-9",
+      number: "09",
+      category: "group",
+      method: "DELETE",
+      path: "/conversations/:id/participants/:userId",
+      title: "Remove Member from Group Chat",
+      description: "Allows group administrators to remove a participant from a group conversation.",
+      requestBody: `// URL Parameter:\nDELETE /api/conversations/conv_9900/participants/usr_55109`,
+      responseBody: `{\n  "success": true,\n  "message": "Participant usr_55109 removed from group"\n}`,
+    },
+    {
+      id: "ep-10",
+      number: "10",
+      category: "group",
+      method: "POST",
+      path: "/conversations/:id/admins",
+      title: "Promote Group Participant to Admin",
+      description: "Grants administrative privileges to a designated group chat member.",
+      requestBody: `{\n  "userId": "usr_44102"\n}`,
+      responseBody: `{\n  "_id": "conv_9900",\n  "adminIds": ["usr_99812", "usr_44102"]\n}`,
+    },
+    {
+      id: "ep-11",
+      number: "11",
+      category: "group",
+      method: "PATCH",
+      path: "/conversations/:id",
+      title: "Update Group Name & Metadata",
+      description: "Allows group administrators to rename the group or modify group settings.",
+      requestBody: `{\n  "name": "PulseChat Core Engineering"\n}`,
+      responseBody: `{\n  "_id": "conv_9900",\n  "name": "PulseChat Core Engineering",\n  "updatedAt": "2026-08-22T08:45:00.000Z"\n}`,
+    },
+  ];
+
+  const filteredEndpoints = endpointsList.filter(
+    (ep) => selectedApiCategory === "all" || ep.category === selectedApiCategory,
+  );
+
+  const getMethodBadgeClass = (method: string) => {
+    switch (method) {
+      case "POST":
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+      case "GET":
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
+      case "DELETE":
+        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20";
+      case "PATCH":
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+      default:
+        return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
+    }
   };
 
   const techStack = [
@@ -176,19 +317,16 @@ export default function LandingPage() {
     { label: "Virtual Messages Tested", value: "1,000,000+" },
     { label: "Target Frame Rate", value: "60 FPS" },
     { label: "Socket Latency", value: "< 15ms" },
-    { label: "API Endpoints Documented", value: "13 REST & WSS" },
+    { label: "API Endpoints Documented", value: "11 REST & 2 WSS" },
   ];
 
   return (
     <div className="relative overflow-hidden bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200">
-      {/* Dynamic Background Gradient Blurs */}
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[550px] w-[850px] -translate-x-1/2 bg-gradient-to-b from-brand-500/20 via-purple-500/15 to-transparent blur-3xl" />
       <div className="pointer-events-none absolute top-1/3 -right-40 h-[400px] w-[400px] bg-blue-500/10 blur-3xl rounded-full" />
 
-      {/* Hero Section */}
       <section className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-16 md:pt-20 md:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Hero Text */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.12]">
               Ultra-Fast, Virtualized <br className="hidden sm:inline" />
@@ -225,10 +363,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Interactive Live Sandbox Card */}
           <div className="lg:col-span-5 relative">
             <div className="rounded-3xl border border-slate-800 bg-slate-900/95 text-white shadow-2xl overflow-hidden backdrop-blur-xl">
-              {/* Topbar Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950/90">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80" />
@@ -243,7 +379,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Message List */}
               <div className="p-4 space-y-3 font-sans text-xs bg-slate-950/70 max-h-[260px] overflow-y-auto">
                 {sandboxMessages.map((msg) => (
                   <div
@@ -289,7 +424,6 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              {/* Interactive Input Form */}
               <form
                 onSubmit={handleSendSandboxMessage}
                 className="p-3 border-t border-slate-800 bg-slate-900/90 flex items-center gap-2"
@@ -310,7 +444,6 @@ export default function LandingPage() {
                 </button>
               </form>
 
-              {/* Realtime Event Console Inspector */}
               <div className="px-4 py-2 border-t border-slate-800/80 bg-black/60 text-[10px] font-mono text-slate-400 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 truncate">
                   <Terminal className="w-3 h-3 text-brand-400 shrink-0" />
@@ -325,7 +458,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Metrics Banner */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-sm">
           {metrics.map((m) => (
@@ -341,7 +473,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Tech Stack Strip */}
       <section className="border-y border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs font-semibold text-slate-600 dark:text-slate-400">
@@ -361,7 +492,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Interactive Virtualization Benchmark Calculator (#architecture) */}
       <section
         id="architecture"
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 scroll-mt-20"
@@ -381,7 +511,6 @@ export default function LandingPage() {
                 PulseChat&apos;s virtualized engine (`react-virtuoso`).
               </p>
 
-              {/* Slider */}
               <div className="pt-4 space-y-2">
                 <div className="flex justify-between text-xs font-mono text-slate-400">
                   <span>Volume: {messageCount.toLocaleString()} messages</span>
@@ -399,9 +528,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Live Performance Comparison */}
             <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Standard DOM Card */}
               <div className="p-5 rounded-2xl border border-rose-500/30 bg-rose-950/20 text-rose-200 space-y-2">
                 <p className="text-xs font-mono font-bold text-rose-400">
                   Unvirtualized DOM
@@ -428,7 +555,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* PulseChat Engine Card */}
               <div className="p-5 rounded-2xl border border-emerald-500/40 bg-emerald-950/30 text-emerald-200 space-y-2 shadow-lg shadow-emerald-500/10">
                 <p className="text-xs font-mono font-bold text-emerald-400">
                   PulseChat Engine
@@ -459,7 +585,6 @@ export default function LandingPage() {
         </Card>
       </section>
 
-      {/* Feature Section */}
       <section
         id="features"
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12"
@@ -499,7 +624,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Technology, Security & Architecture Inspector (#security) */}
       <section
         id="security"
         className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800 scroll-mt-20"
@@ -514,7 +638,6 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Tab Controls */}
         <div className="flex justify-center gap-2 mb-8">
           <button
             onClick={() => setActiveTab("security")}
@@ -548,7 +671,6 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* Tab Content */}
         <Card className="p-6 sm:p-8 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
           {activeTab === "security" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
@@ -656,52 +778,184 @@ export default function LandingPage() {
         </Card>
       </section>
 
-      {/* Docs & API Specification Section (#docs) */}
+      {/* Developer Docs & API Specifications Section */}
       <section
         id="docs"
-        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20 border-t border-slate-200 dark:border-slate-800"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 scroll-mt-20 border-t border-slate-200 dark:border-slate-800"
       >
-        <div className="text-center space-y-3 mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+        <div className="text-center space-y-3 mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-500 dark:text-brand-400 text-xs font-mono">
+            <FileCode2 className="w-3.5 h-3.5" /> API Reference Specification
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Developer Docs & API Specifications
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-            Comprehensive documentation of all 13 REST & WebSocket API
-            endpoints.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            Complete interactive specification covering all <span className="font-semibold text-slate-900 dark:text-white">11 RESTful HTTP Endpoints</span> and <span className="font-semibold text-slate-900 dark:text-white">2 Real-Time WebSocket Contracts</span>.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-          <Card className="p-6 space-y-3 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-brand-500" /> RESTful HTTP
-              Endpoints (11)
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-              Covers authentication (`POST /auth/login`, `GET /auth/me`), user
-              search (`GET /users/search`), conversation retrieval, message
-              history (`GET /conversations/:id/messages`), and full group admin
-              actions (`POST /conversations/group`, `POST /participants`,
-              `DELETE /participants`, `POST /admins`, `PATCH
-              /conversations/:id`).
-            </p>
-          </Card>
+        {/* API Category Filter Tabs */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+          {[
+            { id: "all", label: "All REST Endpoints (11)" },
+            { id: "auth", label: "Authentication (2)" },
+            { id: "users", label: "User Search (1)" },
+            { id: "messages", label: "Messages & History (3)" },
+            { id: "group", label: "Group Admin (5)" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedApiCategory(cat.id as any)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                selectedApiCategory === cat.id
+                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
-          <Card className="p-6 space-y-3 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" /> WebSocket Realtime
-              Event Contracts (2)
+        {/* Numbered & Interactive Endpoint List */}
+        <div className="space-y-4">
+          {filteredEndpoints.map((ep) => {
+            const isExpanded = expandedEndpoint === ep.id;
+            return (
+              <Card
+                key={ep.id}
+                className="overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 shadow-sm hover:shadow-md transition-all"
+              >
+                <div
+                  onClick={() => setExpandedEndpoint(isExpanded ? null : ep.id)}
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer select-none hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <span className="text-xs sm:text-sm font-mono font-extrabold text-slate-400 dark:text-slate-500 shrink-0">
+                      {ep.number}.
+                    </span>
+
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border shrink-0 ${getMethodBadgeClass(
+                        ep.method,
+                      )}`}
+                    >
+                      {ep.method}
+                    </span>
+
+                    <code className="text-xs sm:text-sm font-mono font-semibold text-slate-900 dark:text-slate-100 truncate">
+                      {ep.path}
+                    </code>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-slate-800">
+                    <span className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate max-w-[280px]">
+                      {ep.title}
+                    </span>
+                    <div className="p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 space-y-4 animate-fade-in text-xs">
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                      {ep.description}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-400">
+                          <span>Request Contract Payload</span>
+                          <button
+                            onClick={() => copyToClipboard(ep.requestBody, `${ep.id}-req`)}
+                            className="flex items-center gap-1 text-brand-600 dark:text-brand-400 hover:underline"
+                          >
+                            {copiedId === `${ep.id}-req` ? (
+                              <Check className="w-3 h-3" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                            {copiedId === `${ep.id}-req` ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                        <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] overflow-x-auto border border-slate-800">
+                          {ep.requestBody}
+                        </pre>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-400">
+                          <span>Sample JSON Response</span>
+                          <button
+                            onClick={() => copyToClipboard(ep.responseBody, `${ep.id}-res`)}
+                            className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:underline"
+                          >
+                            {copiedId === `${ep.id}-res` ? (
+                              <Check className="w-3 h-3" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                            {copiedId === `${ep.id}-res` ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                        <pre className="p-3.5 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto border border-slate-800">
+                          {ep.responseBody}
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* WebSocket Realtime Event Contracts (2) Card */}
+        <div className="mt-8">
+          <Card className="p-6 border-slate-200 dark:border-slate-800 bg-gradient-to-r from-amber-500/5 via-indigo-500/5 to-purple-500/5 dark:bg-slate-900/90 space-y-4">
+            <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-500" /> WebSocket Realtime Event Contracts (2)
             </h3>
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-              Real-time Socket.io bidirectional stream handling `message:new`
-              for instant 0ms message dispatch and `conversation:updated` for
-              live title, admin role, and member roster changes.
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-amber-600 dark:text-amber-400">
+                    `message:new`
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[10px] font-mono font-semibold">
+                    Bidirectional
+                  </span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Instant 0ms message delivery event dispatched on incoming text or media messages across direct and group channels.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                    `conversation:updated`
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 text-[10px] font-mono font-semibold">
+                    Server -&gt; Client
+                  </span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Real-time sync event triggered on group title changes, participant additions, member removals, or admin promotions.
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
         <Card className="bg-gradient-to-br from-brand-600 via-brand-700 to-indigo-800 text-white p-8 md:p-14 text-center space-y-6 shadow-2xl relative overflow-hidden border-none">
           <div className="max-w-2xl mx-auto space-y-4 relative z-10">
@@ -727,7 +981,6 @@ export default function LandingPage() {
         </Card>
       </section>
 
-      {/* Floating Chat Widget Launcher */}
       <div className="fixed bottom-6 right-6 z-50 animate-bounce">
         <Link
           href="/chat"

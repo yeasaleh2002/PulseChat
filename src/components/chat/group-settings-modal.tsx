@@ -58,7 +58,6 @@ export function GroupSettingsModal({
     setNewGroupName(conversation.name || "");
   }, [conversation.name]);
 
-  // Debounced search for adding new group members
   useEffect(() => {
     if (!userQuery.trim()) {
       setSearchResults([]);
@@ -130,7 +129,6 @@ export function GroupSettingsModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden glass-panel max-h-[85vh] flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-purple-500/20">
@@ -154,7 +152,6 @@ export function GroupSettingsModal({
           </button>
         </div>
 
-        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 text-rose-700 text-xs font-medium">
@@ -162,7 +159,6 @@ export function GroupSettingsModal({
             </div>
           )}
 
-          {/* Group Name & Rename */}
           <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -205,7 +201,6 @@ export function GroupSettingsModal({
             )}
           </div>
 
-          {/* Add Members Section (Admins Only) */}
           {isAdmin && (
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -266,7 +261,6 @@ export function GroupSettingsModal({
             </div>
           )}
 
-          {/* Members List */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -312,7 +306,6 @@ export function GroupSettingsModal({
                       </div>
                     </div>
 
-                    {/* Admin Actions */}
                     {isAdmin && !isSelf && (
                       <div className="flex items-center gap-1">
                         {!isMemberAdmin && (
@@ -342,7 +335,6 @@ export function GroupSettingsModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center justify-between shrink-0">
           <Button
             onClick={handleLeaveGroup}

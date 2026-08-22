@@ -1,0 +1,4 @@
+# Netlify Redirect Rules for SPA / Next.js routing
+# Ensures routes like /chat, /login, etc. do not return 404 on reload or direct navigation
+
+/*    /index.html   200

@@ -25,17 +25,14 @@ interface ChatState {
   error: string | null;
   unreadCounts: Record<string, number>;
 
-  // Messages State
   messagesByConversation: Record<string, Message[]>;
   isLoadingMessages: boolean;
   isLoadingOlderMessages: boolean;
   hasMoreMessages: Record<string, boolean>;
 
-  // Socket Connection Status
   isSocketConnected: boolean;
   setSocketConnected: (connected: boolean) => void;
 
-  // Actions
   fetchConversations: () => Promise<void>;
   setActiveConversationId: (id: string | null) => void;
   setSearchQuery: (query: string) => void;
@@ -45,19 +42,16 @@ interface ChatState {
   toggleMobileSidebar: () => void;
   clearSearchResults: () => void;
 
-  // Message Actions
   fetchMessagesAction: (conversationId: string, limit?: number) => Promise<void>;
   fetchOlderMessagesAction: (conversationId: string, limit?: number) => Promise<void>;
   sendMessageAction: (conversationId: string, text: string) => Promise<Message | null>;
 
-  // Group Management Actions
   createGroupAction: (name: string, participantIds: string[]) => Promise<Conversation | null>;
   addGroupMembersAction: (groupId: string, userIds: string[]) => Promise<Conversation | null>;
   removeGroupMemberAction: (groupId: string, userId: string) => Promise<Conversation | null>;
   promoteToAdminAction: (groupId: string, userId: string) => Promise<Conversation | null>;
   renameGroupAction: (groupId: string, name: string) => Promise<Conversation | null>;
 
-  // Real-time Event Handlers
   handleNewMessageRealtime: (newMessage: Message) => void;
   handleConversationUpdatedRealtime: (updatedConversation: Conversation) => void;
 }
@@ -294,7 +288,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  // Group Management Actions
   createGroupAction: async (name: string, participantIds: string[]) => {
     try {
       const newGroup = await createGroupApi(name, participantIds);
@@ -382,11 +375,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  // Real-time Event Handlers
   handleNewMessageRealtime: (newMessage: Message) => {
     if (!newMessage) return;
 
-    // Helper to extract conversation ID from message payload
     const extractId = (msg: unknown): string => {
       if (!msg || typeof msg !== "object") return "";
       const m = msg as Record<string, unknown>;
@@ -404,10 +395,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const extractedId = extractId(newMessage);
     const { conversations, activeConversationId } = get();
 
-    // Determine target conversation ID
     let targetConvId = extractedId;
 
-    // If extractedId is missing or doesn't match an existing conversation, match by sender
     if (!targetConvId || !conversations.some((c) => c._id === targetConvId)) {
       const senderId =
         typeof newMessage.sender === "object" && newMessage.sender !== null
@@ -438,7 +427,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     }
 
-    // Fall back to active conversation ID if targetConvId is still empty
     if (!targetConvId && activeConversationId) {
       targetConvId = activeConversationId;
     }

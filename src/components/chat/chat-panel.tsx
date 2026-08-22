@@ -115,7 +115,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 min-w-0 relative">
-      {/* Group Settings Modal */}
       {conversation.type === "group" && (
         <GroupSettingsModal
           conversation={conversation}
@@ -124,7 +123,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
         />
       )}
 
-      {/* Header Bar */}
       <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-10 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -161,7 +159,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
           </div>
         </div>
 
-        {/* Group Header Actions */}
         <div className="flex items-center gap-2">
           {conversation.type === "group" && (
             <button
@@ -174,7 +171,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
         </div>
       </div>
 
-      {/* Virtualized Message List Container */}
       <div className="flex-1 relative min-h-0 bg-slate-50/40 dark:bg-slate-950/40">
         {isLoadingMessages && messages.length === 0 ? (
           <div className="h-full flex items-center justify-center space-y-2 text-xs text-slate-400 flex-col">
@@ -297,7 +293,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
         )}
       </div>
 
-      {/* Sticky Input Bar */}
       <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md shrink-0">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-slate-400">

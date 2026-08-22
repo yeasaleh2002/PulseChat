@@ -78,13 +78,11 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Create Group Modal */}
       <CreateGroupModal
         isOpen={isCreateGroupOpen}
         onClose={() => setIsCreateGroupOpen(false)}
       />
 
-      {/* Mobile Backdrop Overlay */}
       {isMobileSidebarOpen && (
         <div
           onClick={() => setMobileSidebarOpen(false)}
@@ -92,14 +90,12 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar Container */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-40 w-80 md:w-80 flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl transition-transform duration-300 md:static md:translate-x-0 shrink-0",
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Top Branding & New Group Trigger */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200/80 dark:border-slate-800/80">
           <Link href="/" title="Go to Home Landing Page" className="flex items-center gap-2.5 group hover:opacity-90 transition-opacity">
             <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
@@ -128,12 +124,10 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="p-3 border-b border-slate-100 dark:border-slate-800/60">
           <UserSearch />
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex items-center gap-1 p-2 mx-3 mt-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-xs font-medium text-slate-600 dark:text-slate-400">
           <button
             onClick={() => setFilterTab("all")}
@@ -170,7 +164,6 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Conversations List Container */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {isLoadingConversations ? (
             <ConversationSkeleton />
@@ -207,7 +200,6 @@ export function Sidebar() {
                       : "border-transparent hover:bg-slate-100/70 dark:hover:bg-slate-900/70"
                   )}
                 >
-                  {/* Avatar */}
                   <div
                     className={cn(
                       "w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 text-white shadow-sm relative",
@@ -222,7 +214,6 @@ export function Sidebar() {
                     )}
                   </div>
 
-                  {/* Details */}
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex items-center justify-between">
                       <h4
@@ -266,7 +257,6 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* User Footer Profile & Controls */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow">

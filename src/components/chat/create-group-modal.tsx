@@ -92,7 +92,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden glass-panel">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-purple-500/20">
@@ -110,7 +109,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
           </button>
         </div>
 
-        {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {errorMsg && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-200 text-xs font-medium">
@@ -118,7 +116,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             </div>
           )}
 
-          {/* Group Name Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Group Name *
@@ -133,7 +130,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             />
           </div>
 
-          {/* Selected Member Chips */}
           {selectedUsers.length > 0 && (
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -159,7 +155,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             </div>
           )}
 
-          {/* User Search to Add Members */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Add Participants
@@ -178,7 +173,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
               )}
             </div>
 
-            {/* Search Results */}
             {userQuery.trim() !== "" && (
               <div className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-1.5 space-y-1">
                 {searchResults.length === 0 && !isSearching ? (
@@ -226,7 +220,6 @@ export function CreateGroupModal({ isOpen, onClose }: CreateGroupModalProps) {
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
             <Button type="button" variant="outline" size="md" onClick={onClose}>
               Cancel

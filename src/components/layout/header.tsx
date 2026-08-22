@@ -15,7 +15,6 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-md shadow-brand-500/25 group-hover:scale-105 transition-transform duration-200">
             <MessageSquare className="h-5 w-5" />
@@ -25,7 +24,6 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
           {NAV_LINKS.map((link) => (
             <Link
@@ -38,7 +36,6 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Action Controls */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
@@ -78,7 +75,6 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -89,7 +85,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-4 pt-3 pb-6 animate-fade-in">
           <nav className="flex flex-col gap-3 font-medium text-slate-700 dark:text-slate-200">

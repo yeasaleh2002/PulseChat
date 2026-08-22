@@ -19,20 +19,17 @@ export default function LoginPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Security: Debounce & UI Rate-Limiter State
   const [isDebouncing, setIsDebouncing] = useState(false);
   const [attemptTimestamps, setAttemptTimestamps] = useState<number[]>([]);
   const [lockoutTimer, setLockoutTimer] = useState<number>(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/chat");
     }
   }, [isAuthenticated, router]);
 
-  // Lockout countdown handler
   useEffect(() => {
     if (lockoutTimer <= 0) return;
     const interval = setInterval(() => {
@@ -53,18 +50,15 @@ export default function LoginPage() {
     clearError();
     setFormError(null);
 
-    // 1. Check Rate-Limiter Lockout
     if (lockoutTimer > 0) {
       setFormError(`Rate limit exceeded. Please wait ${lockoutTimer}s before retrying.`);
       return;
     }
 
-    // 2. Check Submit Debounce
     if (isDebouncing) {
       return;
     }
 
-    // 3. Validation
     if (!phone.trim() || !name.trim()) {
       setFormError("Please enter both your phone number and name.");
       return;
@@ -75,25 +69,22 @@ export default function LoginPage() {
       return;
     }
 
-    // 4. Rate-Limiting Calculation (Max 4 attempts in rolling 30 seconds)
     const now = Date.now();
     const recentAttempts = [...attemptTimestamps.filter((ts) => now - ts < 30000), now];
     setAttemptTimestamps(recentAttempts);
 
     if (recentAttempts.length >= 4) {
-      setLockoutTimer(12); // Lock out for 12 seconds
+      setLockoutTimer(12);
       setFormError("Security Rate Limit: Too many login attempts. Locked for 12 seconds.");
       return;
     }
 
-    // 5. Apply Submit Debounce (1000ms delay window)
     setIsDebouncing(true);
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
       setIsDebouncing(false);
     }, 1000);
 
-    // 6. Execute Login
     const success = await loginAction(phone.trim(), name.trim());
     if (success) {
       setSuccessMessage("Login successful! Redirecting to PulseChat...");
@@ -105,10 +96,8 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center px-4 py-12">
-      {/* Background Glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-tr from-brand-500/20 to-indigo-500/20 blur-3xl rounded-full" />
 
-      {/* Toast Notifications */}
       {(error || formError) && (
         <Toast
           type="error"
@@ -128,7 +117,6 @@ export default function LoginPage() {
       )}
 
       <Card className="w-full max-w-md p-8 glass-panel shadow-2xl space-y-6">
-        {/* Header */}
         <div className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
             <Lock className="w-6 h-6" />
@@ -141,7 +129,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Rate Limiter Warning Banner */}
         {lockoutTimer > 0 && (
           <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs animate-fade-in">
             <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
@@ -149,9 +136,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Phone Field */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Phone Number
@@ -172,7 +157,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Name Field */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Display Name
@@ -193,7 +177,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             disabled={isLoading || isDebouncing || lockoutTimer > 0}
@@ -217,7 +200,6 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {/* Security Footer Info */}
         <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2">
           <Shield className="w-3.5 h-3.5 text-emerald-500" />
           <span>Protected with rate limiting & Bearer token encryption</span>

@@ -11,9 +11,6 @@ export const api = axios.create({
   },
 });
 
-/**
- * Request Interceptor: Attach Authorization Bearer token from localStorage
- */
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
@@ -27,9 +24,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/**
- * Response Interceptor: Handle 401 Unauthorized errors (auto logout)
- */
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -38,7 +32,6 @@ api.interceptors.response.use(
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         
-        // Auto logout redirection if not already on the login page
         if (window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
@@ -49,3 +42,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+

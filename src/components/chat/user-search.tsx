@@ -35,7 +35,6 @@ export function UserSearch() {
 
   return (
     <div className="relative w-full">
-      {/* Search Input Box */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
           <Search className="w-4 h-4" />
@@ -58,7 +57,6 @@ export function UserSearch() {
         )}
       </div>
 
-      {/* Search Dropdown Modal/Overlay */}
       {searchQuery.trim() !== "" && (
         <div className="absolute top-full left-0 right-0 mt-2 z-50 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-2 animate-fade-in backdrop-blur-xl">
           <div className="flex items-center justify-between px-2 py-1 mb-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">

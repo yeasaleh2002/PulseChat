@@ -1,8 +1,3 @@
-/**
- * PulseChat Advanced Dynamic SEO Engine Keyword Dictionary
- * Categorized repository of 500+ top-tier short-tail and long-tail SEO keywords.
- * Designed for programmatic SEO rotation and contextual metadata injection without keyword stuffing.
- */
 
 export const SEO_KEYWORD_CATEGORIES = {
   realTimeChat: [
@@ -536,9 +531,6 @@ export const SEO_KEYWORD_CATEGORIES = {
   ]
 };
 
-/**
- * Computes total keyword count across all categories.
- */
 export function getKeywordCount(): number {
   return Object.values(SEO_KEYWORD_CATEGORIES).reduce(
     (total, category) => total + category.length,
@@ -546,18 +538,12 @@ export function getKeywordCount(): number {
   );
 }
 
-/**
- * Returns a flattened array of all 500+ unique SEO keywords.
- */
 export function getAllKeywordsFlat(): string[] {
   return Array.from(
     new Set(Object.values(SEO_KEYWORD_CATEGORIES).flat())
   );
 }
 
-/**
- * Smartly samples `count` keywords from specified or all categories without keyword stuffing.
- */
 export function getRandomKeywords(
   count: number = 15,
   categories?: (keyof typeof SEO_KEYWORD_CATEGORIES)[]
@@ -570,9 +556,6 @@ export function getRandomKeywords(
   return shuffled.slice(0, count);
 }
 
-/**
- * Returns contextual keyword subsets tailored to specific routes.
- */
 export function getContextualKeywords(route: string): string[] {
   switch (route) {
     case "/chat":

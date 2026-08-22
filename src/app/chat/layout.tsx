@@ -26,12 +26,9 @@ export default function ChatLayout({
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
-      {/* Sidebar (Left Pane) */}
       <Sidebar />
 
-      {/* Main Chat Area (Right Pane) */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
-        {/* Mobile Navbar Header */}
         <header className="md:hidden flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-2">
             <button
@@ -63,7 +60,6 @@ export default function ChatLayout({
           </div>
         </header>
 
-        {/* Dynamic Page Content */}
         <main className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
           {children}
         </main>

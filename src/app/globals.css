@@ -32,7 +32,6 @@
   }
 }
 
-/* Glassmorphism utility classes */
 .glass-panel {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
@@ -47,7 +46,6 @@
   border: 1px solid rgba(30, 41, 59, 0.8);
 }
 
-/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -64,4 +62,14 @@
 
 .dark ::-webkit-scrollbar-thumb {
   background: rgba(71, 85, 105, 0.5);
+}
+
+#netlify-modal-provider,
+[data-netlify-deploy-preview],
+iframe[src*="netlify"],
+.netlify-feedback-drawer,
+netlify-drawer {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

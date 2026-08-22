@@ -23,7 +23,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Pass token in auth parameter
     socket.auth = { token };
 
     if (!socket.connected) {
@@ -50,7 +49,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setSocketConnected(false);
     };
 
-    // Attach listeners
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("connect_error", onConnectError);
