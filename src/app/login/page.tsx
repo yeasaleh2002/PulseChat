@@ -95,7 +95,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-[85vh] flex items-center justify-center px-4 py-12">
+    <div className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 py-12 gap-6">
       <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 bg-gradient-to-tr from-brand-500/20 to-indigo-500/20 blur-3xl rounded-full" />
 
       {(error || formError) && (
@@ -116,7 +116,7 @@ export default function LoginPage() {
         />
       )}
 
-      <Card className="w-full max-w-md p-8 glass-panel shadow-2xl space-y-6">
+      <Card className="w-full max-w-md p-8 glass-panel shadow-2xl space-y-6 z-10">
         <div className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
             <Lock className="w-6 h-6" />
@@ -205,6 +205,12 @@ export default function LoginPage() {
           <span>Protected with rate limiting & Bearer token encryption</span>
         </div>
       </Card>
+
+      <Link href="/" tabIndex={-1}>
+        <Button variant="ghost" className="z-10 relative">
+          &larr; Back to Landing Page
+        </Button>
+      </Link>
     </div>
   );
 }
