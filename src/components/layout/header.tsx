@@ -7,10 +7,16 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS, APP_CONFIG } from "@/lib/constants";
 import { useAuthStore } from "@/store/useAuthStore";
+import { usePathname } from "next/navigation";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated, logoutAction } = useAuthStore();
+  const pathname = usePathname();
+
+  if (pathname === "/chat" || pathname?.startsWith("/chat/") || pathname === "/login") {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl">
