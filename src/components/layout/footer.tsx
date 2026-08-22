@@ -46,17 +46,17 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
               <li>
-                <Link href="#features" className="hover:text-brand-500 transition-colors">
+                <Link href="/#features" className="hover:text-brand-500 transition-colors">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="#security" className="hover:text-brand-500 transition-colors">
+                <Link href="/#security" className="hover:text-brand-500 transition-colors">
                   Security Headers
                 </Link>
               </li>
               <li>
-                <Link href="#architecture" className="hover:text-brand-500 transition-colors">
+                <Link href="/#architecture" className="hover:text-brand-500 transition-colors">
                   ISR & SEO
                 </Link>
               </li>

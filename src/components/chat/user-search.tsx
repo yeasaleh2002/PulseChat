@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, Loader2, UserPlus, X, User as UserIcon } from "lucide-react";
 import { useChatStore } from "@/store/useChatStore";
 import { User } from "@/types";
@@ -16,6 +16,25 @@ export function UserSearch() {
     clearSearchResults,
   } = useChatStore();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(true);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      setIsOpen(true);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (!searchQuery.trim()) {
       clearSearchResults();
@@ -24,17 +43,18 @@ export function UserSearch() {
 
     const timer = setTimeout(() => {
       searchUsersAction(searchQuery.trim());
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery, searchUsersAction, clearSearchResults]);
 
   const handleSelectUser = async (user: User) => {
+    setIsOpen(false);
     await startDirectChatAction(user._id);
   };
 
   return (
-    <div className="relative w-full">
+    <div ref={containerRef} className="relative w-full">
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
           <Search className="w-4 h-4" />
@@ -42,8 +62,12 @@ export function UserSearch() {
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search users to chat..."
+          onFocus={() => setIsOpen(true)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setIsOpen(true);
+          }}
+          placeholder="Search by name or phone number..."
           className="w-full pl-9 pr-8 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/80 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all"
         />
         {searchQuery && (
@@ -57,7 +81,7 @@ export function UserSearch() {
         )}
       </div>
 
-      {searchQuery.trim() !== "" && (
+      {isOpen && searchQuery.trim() !== "" && (
         <div className="absolute top-full left-0 right-0 mt-2 z-50 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-2 animate-fade-in backdrop-blur-xl">
           <div className="flex items-center justify-between px-2 py-1 mb-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
             <span>Search Results</span>

@@ -21,8 +21,8 @@ export const APP_CONFIG = {
 };
 
 export const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Security", href: "#security" },
-  { label: "Architecture", href: "#architecture" },
-  { label: "Docs", href: "#docs" },
+  { label: "Features", href: "/#features" },
+  { label: "Security", href: "/#security" },
+  { label: "Architecture", href: "/#architecture" },
+  { label: "Docs", href: "/#docs" },
 ];

@@ -16,20 +16,68 @@ export async function getCurrentUser(): Promise<User> {
 }
 
 export async function searchUsers(q: string): Promise<User[]> {
-  const response = await api.get<unknown>("/users/search", {
-    params: { q },
-  });
-  const resData = response.data;
-  if (Array.isArray(resData)) return resData;
-  if (resData && typeof resData === "object") {
-    if ("data" in resData && Array.isArray((resData as { data: User[] }).data)) {
-      return (resData as { data: User[] }).data;
+  const trimmed = q.trim();
+  if (!trimmed) return [];
+
+  const cleanDigits = trimmed.replace(/\D/g, "");
+  const sanitizedQuery = trimmed.replace(/[\+\*\?\^\$\(\)\[\]\{\}\|]/g, "").trim();
+
+  const queriesToTry: string[] = [];
+  if (sanitizedQuery) {
+    queriesToTry.push(sanitizedQuery);
+  }
+  if (cleanDigits && cleanDigits !== sanitizedQuery) {
+    queriesToTry.push(cleanDigits);
+  }
+  queriesToTry.push("");
+
+  const fetchForQuery = async (queryStr: string): Promise<User[]> => {
+    try {
+      const url = queryStr ? `/users/search?q=${encodeURIComponent(queryStr)}` : `/users/search`;
+      const response = await api.get<unknown>(url);
+      const resData = response.data;
+      if (Array.isArray(resData)) return resData;
+      if (resData && typeof resData === "object") {
+        if ("data" in resData && Array.isArray((resData as { data: User[] }).data)) {
+          return (resData as { data: User[] }).data;
+        }
+        if ("users" in resData && Array.isArray((resData as { users: User[] }).users)) {
+          return (resData as { users: User[] }).users;
+        }
+      }
+    } catch (err: unknown) {
+      return [];
     }
-    if ("users" in resData && Array.isArray((resData as { users: User[] }).users)) {
-      return (resData as { users: User[] }).users;
+    return [];
+  };
+
+  const resultsArray = await Promise.all(queriesToTry.map(fetchForQuery));
+  const combined = resultsArray.flat();
+
+  const userMap = new Map<string, User>();
+  for (const u of combined) {
+    if (u && u._id) {
+      userMap.set(u._id, u);
     }
   }
-  return [];
+
+  const allUsers = Array.from(userMap.values());
+  const lowerQuery = trimmed.toLowerCase();
+
+  return allUsers.filter((u) => {
+    if (!u) return false;
+    const nameMatch = u.name ? u.name.toLowerCase().includes(lowerQuery) : false;
+    const rawPhone = u.phone ? u.phone.toLowerCase() : "";
+    const phoneMatch = rawPhone.includes(lowerQuery);
+
+    let digitsPhoneMatch = false;
+    if (cleanDigits.length > 0 && u.phone) {
+      const uDigits = u.phone.replace(/\D/g, "");
+      digitsPhoneMatch = uDigits.includes(cleanDigits);
+    }
+
+    return nameMatch || phoneMatch || digitsPhoneMatch;
+  });
 }
 
 export async function getConversations(): Promise<Conversation[]> {
@@ -77,6 +125,20 @@ export async function getMessageHistory(
   return [];
 }
 
+async function triggerRevalidateTag(tag: string) {
+  try {
+    if (typeof window !== "undefined") {
+      fetch("/api/revalidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag }),
+      }).catch(() => {});
+    }
+  } catch (err: unknown) {
+    // Non-blocking background revalidation call
+  }
+}
+
 export async function sendMessage(
   conversationId: string,
   text: string
@@ -85,6 +147,7 @@ export async function sendMessage(
     conversationId,
     text,
   });
+  triggerRevalidateTag("messages");
   return response.data;
 }
 
@@ -96,6 +159,7 @@ export async function createGroup(
     name,
     participantIds,
   });
+  triggerRevalidateTag("conversations");
   return response.data;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Users,
   X,
@@ -46,6 +46,8 @@ export function GroupSettingsModal({
   const [userQuery, setUserQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(true);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -57,6 +59,22 @@ export function GroupSettingsModal({
   useEffect(() => {
     setNewGroupName(conversation.name || "");
   }, [conversation.name]);
+
+  useEffect(() => {
+    if (userQuery.trim()) {
+      setShowDropdown(true);
+    }
+  }, [userQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!userQuery.trim()) {
@@ -202,7 +220,7 @@ export function GroupSettingsModal({
           </div>
 
           {isAdmin && (
-            <div className="space-y-2">
+            <div ref={searchRef} className="space-y-2">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Add New Members
               </label>
@@ -211,8 +229,12 @@ export function GroupSettingsModal({
                 <input
                   type="text"
                   value={userQuery}
-                  onChange={(e) => setUserQuery(e.target.value)}
-                  placeholder="Search users to invite..."
+                  onFocus={() => setShowDropdown(true)}
+                  onChange={(e) => {
+                    setUserQuery(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  placeholder="Search by name or phone number..."
                   className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
                 />
                 {isSearching && (
@@ -220,7 +242,7 @@ export function GroupSettingsModal({
                 )}
               </div>
 
-              {userQuery.trim() !== "" && (
+              {showDropdown && userQuery.trim() !== "" && (
                 <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-1 space-y-1">
                   {searchResults.map((user) => {
                     const isAlreadyMember = participants.some(
