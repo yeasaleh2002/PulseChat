@@ -55,7 +55,14 @@ interface ChatState {
   handleNewMessageRealtime: (newMessage: Message) => void;
   handleConversationUpdatedRealtime: (updatedConversation: Conversation) => void;
   resetChatState: () => void;
+  clearError: () => void;
 }
+
+const extractError = (err: unknown, defaultMsg: string) => {
+  return err && typeof err === "object" && "response" in err
+    ? (err as any).response?.data?.error?.message || defaultMsg
+    : defaultMsg;
+};
 
 export const useChatStore = create<ChatState>((set, get) => ({
   conversations: [],
@@ -75,6 +82,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isSocketConnected: false,
 
   setSocketConnected: (connected) => set({ isSocketConnected: connected }),
+  
+  clearError: () => set({ error: null }),
 
   resetChatState: () => set({
     conversations: [],
@@ -112,10 +121,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         get().setActiveConversationId(targetId);
       }
     } catch (err: unknown) {
-      set({
-        isLoadingConversations: false,
-        error: "Failed to load conversations.",
-      });
+      set({ error: extractError(err, "Failed to load conversations."), isLoadingConversations: false });
     }
   },
 
@@ -152,7 +158,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const users = await searchUsersApi(query);
       set({ searchResults: users, isSearching: false });
     } catch (err: unknown) {
-      set({ searchResults: [], isSearching: false });
+      set({ searchResults: [], isSearching: false, error: extractError(err, "Failed to search users.") });
     }
   },
 
@@ -177,7 +183,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       get().fetchMessagesAction(conversation._id, 20);
       return conversation;
     } catch (err: unknown) {
-      set({ error: "Could not start direct conversation." });
+      set({ error: extractError(err, "Failed to start direct chat.") });
       return null;
     }
   },
@@ -202,7 +208,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         isLoadingMessages: false,
       }));
     } catch (err: unknown) {
-      set({ isLoadingMessages: false, error: "Failed to load messages." });
+      set({ isLoadingMessages: false, error: extractError(err, "Failed to load messages.") });
     }
   },
 
@@ -257,7 +263,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         };
       });
     } catch (err: unknown) {
-      set({ isLoadingOlderMessages: false });
+      set({ isLoadingOlderMessages: false, error: extractError(err, "Failed to load older messages.") });
     }
   },
 
@@ -303,7 +309,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       return newMessage;
     } catch (err: unknown) {
-      set({ error: "Failed to send message." });
+      set({ error: extractError(err, "Failed to send message.") });
       return null;
     }
   },
@@ -317,7 +323,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       return newGroup;
     } catch (err: unknown) {
-      set({ error: "Failed to create group." });
+      set({ error: extractError(err, "Failed to create group.") });
       return null;
     }
   },
@@ -332,7 +338,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       return updatedGroup;
     } catch (err: unknown) {
-      set({ error: "Failed to add group members." });
+      set({ error: extractError(err, "Failed to add group members.") });
       return null;
     }
   },
@@ -360,7 +366,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       });
       return updatedGroup;
     } catch (err: unknown) {
-      set({ error: "Failed to remove group member." });
+      set({ error: extractError(err, "Failed to remove group member.") });
       return null;
     }
   },
@@ -375,7 +381,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       return updatedGroup;
     } catch (err: unknown) {
-      set({ error: "Failed to promote member to admin." });
+      set({ error: extractError(err, "Failed to promote member to admin.") });
       return null;
     }
   },
@@ -390,7 +396,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
       return updatedGroup;
     } catch (err: unknown) {
-      set({ error: "Failed to rename group." });
+      set({ error: extractError(err, "Failed to rename group.") });
       return null;
     }
   },

@@ -8,13 +8,14 @@ import { useChatStore } from "@/store/useChatStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Menu, MessageSquare, Home } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Toast } from "@/components/ui/toast";
 
 export default function ChatLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { toggleMobileSidebar } = useChatStore();
+  const { toggleMobileSidebar, error, clearError } = useChatStore();
   const { isAuthenticated, isLoading } = useAuthStore();
   const router = useRouter();
 
@@ -64,6 +65,14 @@ export default function ChatLayout({
           {children}
         </main>
       </div>
+
+      {error && (
+        <Toast
+          type="error"
+          message={error}
+          onClose={clearError}
+        />
+      )}
     </div>
   );
 }
