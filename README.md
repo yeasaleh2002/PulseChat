@@ -6,8 +6,8 @@
 
 ## 🔗 Live Demo & Documentation Links
 
-- **Part 1 (Chat Application)**: [https://pulse-chat.vercel.app/chat](https://pulse-chat.vercel.app/chat)
-- **Part 2 (Landing Page)**: [https://pulse-chat.vercel.app](https://pulse-chat.vercel.app)
+- **Part 1 (Chat Application)**: [https://pausechat.netlify.app/chat](https://pausechat.netlify.app/chat)
+- **Part 2 (Landing Page)**: [https://pausechat.netlify.app](https://pausechat.netlify.app)
 - **API Documentation**: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
 ---
@@ -205,6 +205,34 @@ In Next.js 15, we combine **Static Site Generation (SSG)** at build time with **
 - **Token Format Consistency**: `/auth/login` returns `{ token, user }`, whereas `/auth/me` returns raw user object directly without envelope. Handled by creating normalized TypeScript interfaces.
 - **Participant Data Types**: Group conversations return full participant objects (`User[]`), while direct conversations return a single `participant` object. Normalized through `useChatStore` conversation formatters.
 - **Cold Start Latency**: The Render backend spins down on inactivity, causing 30s initial delays. Added friendly UI spinner and retry notifications for initial loading states.
+
+---
+
+### 7. Bot Request Handling & Search Engine Crawler Strategy
+
+#### A. Search Engine Crawlers & Social Link Bots (Googlebot, Bingbot, Twitterbot, Slackbot)
+1. **Pre-rendered HTML Delivery**: Search crawlers (e.g. `User-Agent: Googlebot`) requesting `/`, `/login`, or `/chat` immediately receive static, pre-rendered HTML without waiting for client-side JavaScript execution or API hydration.
+2. **Explicit Robot Directives**: `src/app/layout.tsx` metadata exports specific indexing rules:
+   ```typescript
+   robots: {
+     index: true,
+     follow: true,
+     googleBot: {
+       index: true,
+       follow: true,
+       "max-video-preview": -1,
+       "max-image-preview": "large",
+       "max-snippet": -1,
+     },
+   }
+   ```
+3. **Structured JSON-LD Schema Microdata**: Embedded `SoftwareApplication` JSON-LD microdata provides web crawlers with direct structured metadata describing application category, price (`$0`), capabilities, and operating system targets.
+4. **Rich Social Link Previews**: OpenGraph and Twitter Card metadata tags format instant, rich unfurls when links are shared on Slack, Discord, Twitter, or iMessage.
+
+#### B. Malicious Bot Protection & Rate Limiting
+1. **Security Headers**: `next.config.ts` enforces `Content-Security-Policy`, `X-Frame-Options: DENY` (stopping clickjacking bots), and `X-Content-Type-Options: nosniff` (stopping MIME-sniffing bots).
+2. **Axios Interceptor Token Invalidation**: Automated bot requests attempting unauthorized calls trigger automatic `401 Unauthorized` clearing and session termination.
+3. **UI Debouncing & Lockout Timers**: Form submissions (login, message dispatching) feature 300ms debouncing and rolling lockout timers to prevent automated script spam.
 
 ---
 
