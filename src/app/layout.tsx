@@ -113,16 +113,46 @@ export default function RootLayout({
             __html: `
               (function() {
                 function purgeNetlifyDrawer() {
-                  var sel = ['netlify-drawer', '#netlify-modal-provider', '[data-netlify-deploy-preview]', 'iframe[src*="netlify"]', '.netlify-feedback-drawer', '#netlify-badge', '.netlify-badge', '.powered-by-netlify'];
+                  var sel = [
+                    'netlify-drawer',
+                    '#netlify-modal-provider',
+                    '[data-netlify-deploy-preview]',
+                    'iframe[src*="netlify"]',
+                    '.netlify-feedback-drawer',
+                    '#netlify-badge',
+                    '.netlify-badge',
+                    '.powered-by-netlify',
+                    '[id*="netlify"]',
+                    '[class*="netlify"]'
+                  ];
                   sel.forEach(function(s) {
-                    document.querySelectorAll(s).forEach(function(el) {
-                      try { el.remove(); } catch(e) {}
-                    });
+                    try {
+                      document.querySelectorAll(s).forEach(function(el) {
+                        try { el.remove(); } catch(e) {}
+                      });
+                    } catch(e) {}
                   });
+
+                  try {
+                    document.querySelectorAll('div, a, button, iframe, section, span, footer').forEach(function(el) {
+                      if (el.textContent && el.textContent.indexOf('Powered by Netlify') !== -1) {
+                        try { el.remove(); } catch(e) {}
+                      }
+                      if (el.shadowRoot) {
+                        try {
+                          if (el.shadowRoot.textContent && el.shadowRoot.textContent.indexOf('Powered by Netlify') !== -1) {
+                            el.remove();
+                          }
+                        } catch(e) {}
+                      }
+                    });
+                  } catch(e) {}
                 }
+
                 if (typeof window !== 'undefined') {
                   window.addEventListener('DOMContentLoaded', purgeNetlifyDrawer);
                   window.addEventListener('load', purgeNetlifyDrawer);
+                  setInterval(purgeNetlifyDrawer, 300);
                   try {
                     var obs = new MutationObserver(purgeNetlifyDrawer);
                     obs.observe(document.documentElement, { childList: true, subtree: true });
