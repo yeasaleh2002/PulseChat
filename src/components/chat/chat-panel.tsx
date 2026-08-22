@@ -52,14 +52,6 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
     }
   }, [conversation._id, messagesByConversation, fetchMessagesAction]);
 
-  useEffect(() => {
-    if (messages.length > 0 && virtuosoRef.current) {
-      virtuosoRef.current.scrollToIndex({
-        index: messages.length - 1,
-        behavior: "auto",
-      });
-    }
-  }, [messages.length]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,7 +198,8 @@ export function ChatPanel({ conversation }: ChatPanelProps) {
             atBottomStateChange={(atBottom) => {
               setShowScrollBottomBtn(!atBottom);
             }}
-            followOutput="auto"
+            followOutput={(isAtBottom) => (isAtBottom ? "smooth" : false)}
+            atBottomThreshold={100}
             components={{
               Header: () => (
                 <div className="p-3 text-center">

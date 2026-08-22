@@ -167,6 +167,15 @@ If given additional time to extend this project beyond the assignment scope, I w
 - **Problem**: Using external static images and heavy unoptimized layout animation styles caused hydration mismatches, long rendering delay errors, and browser layout shifts.
 - **Solution**: Replaced heavy static images with pure CSS glassmorphism styling, hardware-accelerated Framer Motion staggered micro-animations (`initial={{ opacity: 0, y: 18 }}`), and added `suppressHydrationWarning` to the root HTML body tag.
 
+#### C. Auto-Scroll Snapping Issue (React Virtuoso)
+
+- **Problem**: When users scrolled up to read older messages, receiving a new real-time message via WebSockets forcefully snapped their viewport back to the bottom. This resulted in a disruptive UX where users lost their reading position.
+- **Root Cause**: A rogue `useEffect` block in `chat-panel.tsx` was manually triggering `virtuosoRef.current.scrollToIndex` every time `messages.length` changed. This aggressive manual control overrode `react-virtuoso`'s built-in intelligent scrolling behaviors.
+- **Manual Resolution**:
+  1. Removed the conflicting `useEffect` that was forcing the scroll to bottom on every array mutation.
+  2. Implemented Virtuoso's native `followOutput` property using a dynamic callback: `followOutput={(isAtBottom) => isAtBottom ? 'smooth' : false}`. This ensures the list only auto-scrolls for new incoming messages if the user is *already* at the bottom of the chat.
+  3. Added `atBottomThreshold={100}` to provide a 100px grace buffer so the auto-scroll triggers reliably even if the user isn't perfectly pixel-snapped to the edge.
+
 ---
 
 ### 6. SEO Optimization & Incremental Static Regeneration (ISR) Architecture
